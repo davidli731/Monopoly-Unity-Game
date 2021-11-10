@@ -81,6 +81,7 @@ public class PopupCard : MonoBehaviour
         MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Hotel";
     }
 
+    // Sell property button
     private void SellPropertyOnClick()
     {
         Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BaseAmount / 2;
@@ -92,6 +93,7 @@ public class PopupCard : MonoBehaviour
         MortgageBtn.interactable = false;
     }
 
+    // Mortgage/Sell houses/hotel button
     private void MortgageBtnOnClick()
     {
         if (property.PropertyList[propertyIndex].Type == "property" && property.PropertyList[propertyIndex].Houses > 1)
@@ -174,11 +176,13 @@ public class PopupCard : MonoBehaviour
         setTextDescription();
     }
 
+    // Close title deeds/popup card
     private void CloseBtnOnClick()
     {
         gameObject.SetActive(false);
     }
 
+    // Show card when they are clicked
     public void Show(Property property, Properties selectedProperty, int[] Cash)
     {
         this.Cash = Cash;
@@ -224,6 +228,7 @@ public class PopupCard : MonoBehaviour
         TitleText.text = "TITLE DEED\n" + property.PropertyList[propertyIndex].Name;
     }
 
+    // set the unimproved rent value on the title deed cards
     private void setRent()
     {
         setTextDescription();
@@ -245,6 +250,7 @@ public class PopupCard : MonoBehaviour
         RentValuesText.text = text;
     }
 
+    // Set the description text for the title deed cards 
     private void setTextDescription()
     {
         // Set property text on left side of card
@@ -318,6 +324,8 @@ public class PopupCard : MonoBehaviour
         RentLeftText.text = text;
     }
 
+
+    // Enable or disable buttons depending on the player's cash level, and follow monopoly's building rules
     private void setButtons()
     {
         int liftMortgageAmount = (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f);
