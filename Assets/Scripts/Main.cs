@@ -9,24 +9,24 @@ using System;
 public class Main : MonoBehaviour, IPointerClickHandler
 {
 
-    // Variables
+    // Transform and Rigidbody Variables
     [SerializeField] private GameObject Object;
-    [SerializeField] private Transform[] TransformPlayer = new Transform[2];
     [SerializeField] private Rigidbody[] RigidbodyPlayer = new Rigidbody[2];
+    [SerializeField] private Transform[] TransformPlayer = new Transform[2];
     [SerializeField] private Transform[] DieFace1 = new Transform[6];
     [SerializeField] private Transform[] DieFace2 = new Transform[6];
     [SerializeField] private Transform[] BoardLocation = new Transform[28];   // 28 total properties
     [SerializeField] private Transform[] Chance = new Transform[16];          // 16 chance cards
     [SerializeField] private Transform[] Community = new Transform[16];       // 16 community chest cards
 
-    // Buttons
+    // Buttons Variables
     [SerializeField] private Button PlayBtn;
     [SerializeField] private Button JailFreeBtn;
     [SerializeField] private Button BailBtn;
     [SerializeField] private Button BuyBtn;
     [SerializeField] private Button ExitBtn;
 
-    // Text
+    // Text Variables
     [SerializeField] private TextMeshProUGUI PropertyDetailsText;
     [SerializeField] private TextMeshProUGUI CashText;
     [SerializeField] private TextMeshProUGUI LogText;
@@ -35,25 +35,28 @@ public class Main : MonoBehaviour, IPointerClickHandler
     // Panel
     [SerializeField] private PopupCard PropertyPopup;
 
+    // Private variables
     private string propertyName = "";
     private string propertyPrice = "";
     private string logString = "";
 
     private int[] Cash = new int[2];
-    private float movementSpeed = 6f;
-    private bool spaceKeyWasPressed;
-    private int currentPlayer;
     private int[] rollValue = new int[2];
     private int[] doublesCounter = new int[2];
     private int[] jailTurnCounter = new int[2];
-    private bool[] isInJail = new bool[2];
     private int[] currentIndex = new int[2];
     private int[] destinationIndex = new int[2];
+    private int[] getOutOfJailFree = new int[2];
+    private int currentPlayer;
+
+    private float[] lastSqrMagnitude = new float[2];
+    private float movementSpeed = 6f;
+
+    private bool[] isInJail = new bool[2];
     private bool[] playerTurn = new bool[2];
     private bool[] inTransit = new bool[2];
-    private float[] lastSqrMagnitude = new float[2];
     private bool[] rollForRent = new bool[2];
-    private int[] getOutOfJailFree = new int[2];
+    private bool spaceKeyWasPressed;
 
     private Vector3[] destinationCoordinates = new Vector3[2];
     private Position position;
@@ -84,6 +87,8 @@ public class Main : MonoBehaviour, IPointerClickHandler
         logString = "Press the Play button or SPACE key to start.";
 
         playerTurn[0] = true;
+
+        // Initialise start of game
         for (int i = 0; i < 2; i++)
         {
             currentIndex[i] = 0;
@@ -118,6 +123,20 @@ public class Main : MonoBehaviour, IPointerClickHandler
         checkRollForRent();
     }
 
+    // Update for any physics aspects for the game
+    private void FixedUpdate()
+    {
+        if (spaceKeyWasPressed)
+        {
+            resetCardVectors();
+            getDieResult();
+            getPlayer();
+
+            // Reset space bar pressed for next turn
+            spaceKeyWasPressed = false;
+        }
+    }
+
     // Pointer Click Event Handler
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -130,6 +149,72 @@ public class Main : MonoBehaviour, IPointerClickHandler
                 PropertyPopup.Show(property, selectedProperty, Cash);
             }
         }
+    }
+
+    // Play Button onClick function
+    void PlayBtnOnClick()
+    {
+        spaceKeyWasPressed = true;
+        if (GameObject.Find("PlayButton").GetComponentInChildren<Text>().text == "Play")
+        {
+            GameObject.Find("PlayButton").GetComponentInChildren<Text>().text = "Roll Dice";
+        }
+    }
+
+    // Get out of Jail Button onClick function
+    void JailFreeBtnOnClick()
+    {
+        if (playerTurn[0])
+        {
+            getOutOfJailFree[0]--;
+            isInJail[0] = false;
+            logString = "Player 1 used Get out of Jail card! ";
+        }
+        else if (playerTurn[1])
+        {
+            getOutOfJailFree[1]--;
+            isInJail[1] = false;
+            logString = "Player 2 used Get out of Jail card! ";
+        }
+        JailFreeBtn.interactable = false;
+    }
+
+    // Bail from jail Button onClick function
+    void BailBtnOnClick()
+    {
+        if (playerTurn[0])
+        {
+            Cash[0] -= 50;
+            isInJail[0] = false;
+            logString = "Player 1 paid for bail! ";
+        }
+        else if (playerTurn[1])
+        {
+            Cash[1] -= 50;
+            isInJail[1] = false;
+            logString = "Player 2 paid for bail! ";
+        }
+        BailBtn.interactable = false;
+    }
+
+    // Buy property Button onClick function
+    void BuyBtnOnClick()
+    {
+        int index = property.GetPropertyIndex(destinationIndex[currentPlayer]);
+        property.PropertyList[index].IsOwned = true;
+        property.PropertyList[index].OwnedPlayer = currentPlayer;
+        if (Cash[currentPlayer] >= property.PropertyList[index].BaseAmount) Cash[currentPlayer] -= property.PropertyList[index].BaseAmount;
+
+        GameObject.Find("BuyButton").GetComponentInChildren<Text>().text = "Buy";
+        BuyBtn.interactable = false;
+
+        logString = "Player " + (currentPlayer + 1) + " bought " + property.PropertyList[index].Name + "! ";
+    }
+
+    // Exit Button onClick function
+    void ExitBtnOnClick()
+    {
+        Application.Quit();
     }
 
     // Trigger spaceKeyWasPressed boolean and change button text "Play" to "Roll Dice"
@@ -257,85 +342,6 @@ public class Main : MonoBehaviour, IPointerClickHandler
 
                 spaceKeyWasPressed = false;
             }
-        }
-    }
-
-    // Play Button onClick function
-    void PlayBtnOnClick()
-    {
-        spaceKeyWasPressed = true;
-        if (GameObject.Find("PlayButton").GetComponentInChildren<Text>().text == "Play")
-        {
-            GameObject.Find("PlayButton").GetComponentInChildren<Text>().text = "Roll Dice";
-        }
-    }
-
-    // Get out of Jail Button onClick function
-    void JailFreeBtnOnClick()
-    {
-        if (playerTurn[0])
-        {
-            getOutOfJailFree[0]--;
-            isInJail[0] = false;
-            logString = "Player 1 used Get out of Jail card! ";
-        }
-        else if (playerTurn[1])
-        {
-            getOutOfJailFree[1]--;
-            isInJail[1] = false;
-            logString = "Player 2 used Get out of Jail card! ";
-        }
-        JailFreeBtn.interactable = false;
-    }
-
-    // Bail from jail Button onClick function
-    void BailBtnOnClick()
-    {
-        if (playerTurn[0])
-        {
-            Cash[0] -= 50;
-            isInJail[0] = false;
-            logString = "Player 1 paid for bail! ";
-        }
-        else if (playerTurn[1])
-        {
-            Cash[1] -= 50;
-            isInJail[1] = false;
-            logString = "Player 2 paid for bail! ";
-        }
-        BailBtn.interactable = false;
-    }
-
-    // Buy property Button onClick function
-    void BuyBtnOnClick()
-    {
-        int index = property.GetPropertyIndex(destinationIndex[currentPlayer]);
-        property.PropertyList[index].IsOwned = true;
-        property.PropertyList[index].OwnedPlayer = currentPlayer;
-        if (Cash[currentPlayer] >= property.PropertyList[index].BaseAmount) Cash[currentPlayer] -= property.PropertyList[index].BaseAmount;
-
-        GameObject.Find("BuyButton").GetComponentInChildren<Text>().text = "Buy";
-        BuyBtn.interactable = false;
-
-        logString = "Player " + (currentPlayer + 1) + " bought " + property.PropertyList[index].Name + "! ";
-    }
-
-    // Exit Button onClick function
-    void ExitBtnOnClick()
-    {
-        Application.Quit();
-    }
-
-    private void FixedUpdate()
-    {
-        if (spaceKeyWasPressed)
-        {
-            resetCardVectors();
-            getDieResult();
-            getPlayer();
-
-            // Reset space bar pressed for next turn
-            spaceKeyWasPressed = false;
         }
     }
 
@@ -554,7 +560,16 @@ public class Main : MonoBehaviour, IPointerClickHandler
             {
                 if (!destinationProperty.IsHotel)
                 {
-                    money.TransferCash(Cash, playerIndex, destinationProperty.OwnedPlayer, destinationProperty.Rent[destinationProperty.Houses]);
+
+                    // if the property is unimproved but the player owns all properties in the colour group, rent is doubled
+                    if (destinationProperty.Houses == 0 && property.CheckForMonopoly(destinationProperty.Colour, destinationProperty.OwnedPlayer))
+                    {
+                        money.TransferCash(Cash, playerIndex, destinationProperty.OwnedPlayer, 2 * destinationProperty.Rent[destinationProperty.Houses]);
+                    }
+                    else
+                    {
+                        money.TransferCash(Cash, playerIndex, destinationProperty.OwnedPlayer, destinationProperty.Rent[destinationProperty.Houses]);
+                    }
                 }
                 else
                 {

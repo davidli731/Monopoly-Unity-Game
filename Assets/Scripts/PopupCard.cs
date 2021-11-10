@@ -96,9 +96,9 @@ public class PopupCard : MonoBehaviour
     // Mortgage/Sell houses/hotel button
     private void MortgageBtnOnClick()
     {
+        // Button text on click is = Sell House if they have at least 2 houses no a property
         if (property.PropertyList[propertyIndex].Type == "property" && property.PropertyList[propertyIndex].Houses > 1)
         {
-            // Button text = Sell House
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BuildCost / 2;
             property.PropertyList[propertyIndex].Houses -= 1;
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
@@ -111,12 +111,15 @@ public class PopupCard : MonoBehaviour
             }
             BuyHotelBtn.interactable = false;
         }
+
+        // Button text on click goes from Sell House -> Mortgage
         else if (property.PropertyList[propertyIndex].Type == "property" && property.PropertyList[propertyIndex].Houses == 1)
         {
-            // Button text = Sell House -> Mortgage
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BuildCost / 2;
             property.PropertyList[propertyIndex].Houses -= 1;
             MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+
+            // if the player has enough cash, they can choose to build houses
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
             {
                 BuyHouseBtn.interactable = true;
@@ -127,12 +130,15 @@ public class PopupCard : MonoBehaviour
             }
             SellPropertyBtn.interactable = true;
         }
+
+        // Button text on click goes from Sell Hotel -> Mortgage
         else if (property.PropertyList[propertyIndex].Type == "property" && property.PropertyList[propertyIndex].IsHotel)
         {
-            // Button text = Sell Hotel -> Mortgage
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BuildCost / 2;
             property.PropertyList[propertyIndex].IsHotel = false;
             MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+
+            // if player has enough cash, they may buy houses after selling a hotel and becoming an unimproved property
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
             {
                 BuyHouseBtn.interactable = true;
@@ -143,12 +149,15 @@ public class PopupCard : MonoBehaviour
             }
             SellPropertyBtn.interactable = true;
         }
+
+        // Button text on click goes from Mortgage -> Lift Mortgage
         else if (!property.PropertyList[propertyIndex].IsMortgaged)
         {
-            // Button text = Mortgage -> Lift Mortgage
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BaseAmount / 2;
             property.PropertyList[propertyIndex].IsMortgaged = true;
             MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Lift Mortgage ($" + (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f) + ")";
+
+            // disable buying houses option if the player doesn't have enough cash
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] < (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f))
             {
                 MortgageBtn.interactable = false;
@@ -157,12 +166,15 @@ public class PopupCard : MonoBehaviour
             BuyHouseBtn.interactable = false;
             SellPropertyBtn.interactable = false;
         }
+
+        // Button text on click goes from Lift Mortgage -> Mortgage
         else if (property.PropertyList[propertyIndex].IsMortgaged)
         {
-            // Button text = Lift Mortgage -> Mortgage
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] -= (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f);
             property.PropertyList[propertyIndex].IsMortgaged = false;
             MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+
+            // Enable/disable buy houses option if they have the cash
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
             {
                 BuyHouseBtn.interactable = true;
@@ -192,17 +204,6 @@ public class PopupCard : MonoBehaviour
         MortgageBtn.interactable = true;
         BuyHouseBtn.interactable = true;
 
-        if (property.PropertyList[propertyIndex].Type == "property")
-        {
-            BuyHouseBtn.gameObject.SetActive(true);
-            BuyHotelBtn.gameObject.SetActive(true);
-        }
-        else
-        {
-            BuyHouseBtn.gameObject.SetActive(false);
-            BuyHotelBtn.gameObject.SetActive(false);
-        }
-
         setTitle();
         setRent();
         setButtons();
@@ -212,6 +213,7 @@ public class PopupCard : MonoBehaviour
     // Set title and colour of property card
     private void setTitle()
     {
+        // If the colour group of the property is dark purple (#0e3578) or dark blue (#00529e), set text colour to white, else black
         if (property.PropertyList[propertyIndex].Colour == "#0e3578" || property.PropertyList[propertyIndex].Colour == "#00529e")
         {
             TitleText.color = Color.white;
@@ -228,13 +230,13 @@ public class PopupCard : MonoBehaviour
         TitleText.text = "TITLE DEED\n" + property.PropertyList[propertyIndex].Name;
     }
 
-    // set the unimproved rent value on the title deed cards
+    // Set the rent values
     private void setRent()
     {
         setTextDescription();
         string text = "";
 
-        // Set text on right side of card
+        // Set the right aligned value text for each property
         if (property.PropertyList[propertyIndex].Type == "property" || property.PropertyList[propertyIndex].Type == "station")
         {
             for (int i = 1; i < property.PropertyList[propertyIndex].Rent.Length; i++)
@@ -256,17 +258,17 @@ public class PopupCard : MonoBehaviour
         // Set property text on left side of card
         string text = "";
 
-        int index = property.GetPropertyIndex(property.PropertyList[propertyIndex].PositionIndex);
-
         if (property.PropertyList[propertyIndex].Type != "utility")
         {
+
+            // if property is unimproved, set the subtitle text
             RentTopText.text = "Rent $" + property.PropertyList[propertyIndex].Rent[0];
-            if (property.PropertyList[index].Houses == 0 && !property.PropertyList[index].IsHotel && property.PropertyList[index].IsOwned)
+            if (property.PropertyList[propertyIndex].Houses == 0 && !property.PropertyList[propertyIndex].IsHotel && property.PropertyList[propertyIndex].IsOwned)
             {
                 RentTopText.text += " *";
             }
 
-            // is property
+            // if selected property is a street property, set body text
             if (property.PropertyList[propertyIndex].Type == "property")
             {
                 for (int i = 1; i <= 4; i++)
@@ -280,21 +282,21 @@ public class PopupCard : MonoBehaviour
                     {
                         text += "s ";
                     }
-                    if (property.PropertyList[index].Houses == i)
+                    if (property.PropertyList[propertyIndex].Houses == i)
                     {
                         text += "*";
                     }
                     text += "\n\n";
                 }
                 text += "With Hotel ";
-                if (property.PropertyList[index].IsHotel)
+                if (property.PropertyList[propertyIndex].IsHotel)
                 {
                     text += "*";
                 }
                 text += "\n\nMortgage Value";
             }
 
-            // is station
+            // if selected property is a station, set body text
             else if (property.PropertyList[propertyIndex].Type == "station")
             {
                 int numberOfStationsOwned = property.NumberOfStationsOwned(property.PropertyList[propertyIndex].OwnedPlayer);
@@ -313,7 +315,7 @@ public class PopupCard : MonoBehaviour
             }
         }
 
-        // is utility
+        // if selected property is a utility, set body text
         else
         {
             RentTopText.text = "";
@@ -330,10 +332,13 @@ public class PopupCard : MonoBehaviour
     {
         int liftMortgageAmount = (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f);
 
+        // Disable buying of houses and hotels if property selected is a station or utility
         if (property.PropertyList[propertyIndex].Type == "station" || property.PropertyList[propertyIndex].Type == "utility")
         {
             BuyHouseBtn.gameObject.SetActive(false);
             BuyHotelBtn.gameObject.SetActive(false);
+
+            // Setting mortgage rules
             if (!property.PropertyList[propertyIndex].IsMortgaged)
             {
                 MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
@@ -343,39 +348,39 @@ public class PopupCard : MonoBehaviour
                 MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Lift Mortgage ($" + liftMortgageAmount + ")";
                 if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= liftMortgageAmount)
                 {
-                    MortgageBtn.interactable = false;
+                    MortgageBtn.interactable = true;
                 }
                 else
                 {
-                    MortgageBtn.interactable = true;
+                    MortgageBtn.interactable = false;
                 }
             }
         }
 
-        // Selected property
+
+        // if the property selected is a street property and player has enough cash, allow buying of houses
         else
         {
+            BuyHouseBtn.gameObject.SetActive(true);
+            BuyHotelBtn.gameObject.SetActive(true);
+
             if (property.PropertyList[propertyIndex].Houses < 4)
             {
-                if (property.PropertyList[propertyIndex].Type == "station" || property.PropertyList[propertyIndex].Type == "utility")
+                if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost) &&
+                        !property.PropertyList[propertyIndex].IsHotel)
                 {
-                    BuyHouseBtn.gameObject.SetActive(true);
-                    BuyHotelBtn.gameObject.SetActive(false);
+                    BuyHouseBtn.interactable = true;
                 }
                 else
                 {
-                    if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost) &&
-                        !property.PropertyList[propertyIndex].IsHotel)
-                    {
-                        BuyHouseBtn.interactable = true;
-                    }
-                    else
-                    {
-                        BuyHouseBtn.interactable = false;
-                    }
-                    BuyHotelBtn.interactable = false;
+                    BuyHouseBtn.interactable = false;
                 }
+                BuyHotelBtn.interactable = false;
             }
+
+            /* if player has 4 houses and has a monopoly (all properties within a colour group owned and 4 houses for each), 
+             * they may buy a hotel if they have enough cash
+             */
             else if (property.PropertyList[propertyIndex].Houses == 4)
             {
                 if (property.CheckForMonopoly(property.PropertyList[propertyIndex].Colour, property.PropertyList[propertyIndex].OwnedPlayer))
@@ -392,13 +397,15 @@ public class PopupCard : MonoBehaviour
                 BuyHouseBtn.interactable = false;
             }
 
-
+            // If player has houses, allow selling of houses
             if (property.PropertyList[propertyIndex].Houses >= 1)
             {
                 MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell House";
             }
             else
             {
+
+                // If property is not mortgaged, allow selling of hotel if hotel is owned
                 if (!property.PropertyList[propertyIndex].IsMortgaged)
                 {
                     if (property.PropertyList[propertyIndex].IsHotel)
@@ -412,6 +419,8 @@ public class PopupCard : MonoBehaviour
                 }
                 else
                 {
+
+                    // If property is mortgaged, disable buying houses option, player can lift mortgage if they have the cash
                     if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= liftMortgageAmount)
                     {
                         MortgageBtn.interactable = true;
@@ -421,6 +430,7 @@ public class PopupCard : MonoBehaviour
                         MortgageBtn.interactable = false;
                     }
                     MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Lift Mortgage ($" + liftMortgageAmount + ")";
+                    BuyHouseBtn.interactable = false;
                 }
             }
         }

@@ -22,7 +22,7 @@ public struct Positions
 
 public class Position : MonoBehaviour
 {
-    // Initialise positions
+    // Hardcoded centre positions for each spot on the spot
     public Positions[] Pos = new Positions[]
     {
         new Positions ( "GO", 6.58f, -6.5f, 0 ),

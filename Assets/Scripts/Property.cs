@@ -53,6 +53,7 @@ public class Property : MonoBehaviour
 {
     // Initialise all properties, stations and utilities
     // Although Mediteranean Avenue and Baltic Avenue are brown on board, they will be considered as dark purple for rules
+    // Rent is written in an array format of {unimproved property, 1 house, 2 house, 3 house 4 house, hotel}, unless it's a station or utility
     public Properties[] PropertyList = new Properties[]
 {
         new Properties(
