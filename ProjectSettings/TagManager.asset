@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: board
+    uniqueID: 1823571647
+    locked: 0
+  - name: Die
+    uniqueID: 1231105539
+    locked: 0
+  - name: card_backs
+    uniqueID: 1794359387
+    locked: 0
+  - name: chance_cards
+    uniqueID: 1932337805
+    locked: 0
+  - name: comm_chest_cards
+    uniqueID: 3601949
+    locked: 0
+  - name: player0
+    uniqueID: 3470827369
+    locked: 0
+  - name: player1
+    uniqueID: 1000834859
+    locked: 0
+  - name: property_cards
+    uniqueID: 2084549571
+    locked: 0
+  - name: button
+    uniqueID: 3013899141
+    locked: 0
