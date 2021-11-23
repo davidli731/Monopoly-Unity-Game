@@ -64,7 +64,7 @@ public class PopupCard : MonoBehaviour
         }
         SellPropertyBtn.interactable = false;
         MortgageBtn.interactable = true;
-        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell House";
+        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell House ($" + (property.PropertyList[propertyIndex].BuildCost / 2) + ")";
     }
 
     // Can only buy hotels when all properties in a colour group are owned and have all 4 houses on each
@@ -78,7 +78,7 @@ public class PopupCard : MonoBehaviour
         BuyHotelBtn.interactable = false;
         SellPropertyBtn.interactable = false;
         MortgageBtn.interactable = true;
-        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Hotel";
+        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Hotel ($" + (property.PropertyList[propertyIndex].BuildCost / 2) + ")";
     }
 
     // Sell property button
@@ -117,7 +117,7 @@ public class PopupCard : MonoBehaviour
         {
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BuildCost / 2;
             property.PropertyList[propertyIndex].Houses -= 1;
-            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
 
             // if the player has enough cash, they can choose to build houses
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
@@ -136,7 +136,7 @@ public class PopupCard : MonoBehaviour
         {
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] += property.PropertyList[propertyIndex].BuildCost / 2;
             property.PropertyList[propertyIndex].IsHotel = false;
-            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
 
             // if player has enough cash, they may buy houses after selling a hotel and becoming an unimproved property
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
@@ -172,7 +172,7 @@ public class PopupCard : MonoBehaviour
         {
             Cash[property.PropertyList[propertyIndex].OwnedPlayer] -= (int)((property.PropertyList[propertyIndex].BaseAmount / 2) * 1.1f);
             property.PropertyList[propertyIndex].IsMortgaged = false;
-            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+            MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
 
             // Enable/disable buy houses option if they have the cash
             if (Cash[property.PropertyList[propertyIndex].OwnedPlayer] >= (property.PropertyList[propertyIndex].BuildCost))
@@ -208,6 +208,10 @@ public class PopupCard : MonoBehaviour
         setRent();
         setButtons();
         gameObject.SetActive(true);
+
+        BuyHouseBtn.gameObject.GetComponentInChildren<Text>().text = "Buy House ($" + property.PropertyList[propertyIndex].BuildCost + ")";
+        BuyHotelBtn.gameObject.GetComponentInChildren<Text>().text = "Buy Hotel ($" + property.PropertyList[propertyIndex].BuildCost + ")";
+        SellPropertyBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Property ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
     }
 
     // Set title and colour of property card
@@ -263,7 +267,15 @@ public class PopupCard : MonoBehaviour
 
             // if property is unimproved, set the subtitle text
             RentTopText.text = "Rent $" + property.PropertyList[propertyIndex].Rent[0];
-            if (property.PropertyList[propertyIndex].Houses == 0 && !property.PropertyList[propertyIndex].IsHotel && property.PropertyList[propertyIndex].IsOwned)
+            if (property.PropertyList[propertyIndex].Type == "property" &&
+                property.PropertyList[propertyIndex].Houses == 0 &&
+                !property.PropertyList[propertyIndex].IsHotel &&
+                property.PropertyList[propertyIndex].IsOwned)
+            {
+                RentTopText.text += " *";
+            }
+            else if (property.PropertyList[propertyIndex].Type == "station" &&
+              property.NumberOfStationsOwned(property.PropertyList[propertyIndex].OwnedPlayer) == 1)
             {
                 RentTopText.text += " *";
             }
@@ -307,6 +319,7 @@ public class PopupCard : MonoBehaviour
                     if (numberOfStationsOwned == i)
                     {
                         text += "*";
+
                     }
 
                     text += "\n\n";
@@ -341,7 +354,7 @@ public class PopupCard : MonoBehaviour
             // Setting mortgage rules
             if (!property.PropertyList[propertyIndex].IsMortgaged)
             {
-                MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+                MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
             }
             else
             {
@@ -400,7 +413,7 @@ public class PopupCard : MonoBehaviour
             // If player has houses, allow selling of houses
             if (property.PropertyList[propertyIndex].Houses >= 1)
             {
-                MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell House";
+                MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell House ($" + (property.PropertyList[propertyIndex].BuildCost / 2) + ")";
             }
             else
             {
@@ -410,11 +423,11 @@ public class PopupCard : MonoBehaviour
                 {
                     if (property.PropertyList[propertyIndex].IsHotel)
                     {
-                        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Hotel";
+                        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Sell Hotel ($" + (property.PropertyList[propertyIndex].BuildCost / 2) + ")";
                     }
                     else
                     {
-                        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage";
+                        MortgageBtn.gameObject.GetComponentInChildren<Text>().text = "Mortgage ($" + (property.PropertyList[propertyIndex].BaseAmount / 2) + ")";
                     }
                 }
                 else

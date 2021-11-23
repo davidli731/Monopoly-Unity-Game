@@ -417,7 +417,7 @@ public class Property : MonoBehaviour
             false,
             -1,
             0,
-            150,
+            0,
             false,
             false)
 };
