@@ -16,7 +16,7 @@ public class DieRoll : MonoBehaviour
         }
         // roll die effect
         int num = rnd.Next(1, 6);
-        dieFace[num].position = new Vector3(dieFace[num].position.x, dieFace[num - 1].position.y, 0);
-        return num + 1;
+        dieFace[num - 1].position = new Vector3(dieFace[num - 1].position.x, dieFace[num - 1].position.y, 0);
+        return num;
     }
 }
